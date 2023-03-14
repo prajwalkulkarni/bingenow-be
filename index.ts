@@ -203,7 +203,7 @@ app.use('/graphql', expressGraphQL({
 
 
 
-
+mongoose.set("strictQuery", false);
 mongoose
     .connect(`mongodb+srv://${process.env.DB_USR}:${process.env.DB_PASS}@cluster0.gmn6g.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`, {
         useNewUrlParser: true,
