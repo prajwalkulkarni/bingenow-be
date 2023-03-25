@@ -216,4 +216,4 @@ mongoose
         console.log("Error connecting to database: ", err)
     })
 
-module.exports = app;
+exports.handler = app;

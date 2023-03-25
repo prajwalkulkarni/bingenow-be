@@ -126,13 +126,10 @@ const Mutation = new GraphQLObjectType({
                 id: { type: GraphQLString }
             },
             resolve: async (parent, args) => {
-                console.log(args.id);
                 const user = await User.findOne({ _id: args.id });
-                console.log(user);
                 if (user) {
                     try {
                         const item = user.watchlist.find((item) => item.imdbId === args.imdbId);
-                        console.log(args.imdbId, item);
                         if (item) {
                             await User.findByIdAndUpdate({ _id: args.id }, { "$pull": { "watchlist": { imdbId: args.imdbId } } });
                         }
@@ -168,6 +165,7 @@ app.use('/graphql', expressGraphQL({
     schema,
     mutation: Mutation,
 }));
+mongoose.set("strictQuery", false);
 mongoose
     .connect(`mongodb+srv://${process.env.DB_USR}:${process.env.DB_PASS}@cluster0.gmn6g.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`, {
     useNewUrlParser: true,
@@ -179,4 +177,4 @@ mongoose
 }).catch((err) => {
     console.log("Error connecting to database: ", err);
 });
-module.exports = app;
+exports.handler = app;
