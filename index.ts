@@ -148,14 +148,14 @@ const Mutation = new GraphQLObjectType({
                 id: { type: GraphQLString }
             },
             resolve: async (parent: any, args: any) => {
-                console.log(args.id)
+                
                 const user = await User.findOne({ _id: args.id })
-                console.log(user)
+
                 if (user) {
                     try {
 
                         const item = user.watchlist.find((item: any) => item.imdbId === args.imdbId)
-                        console.log(args.imdbId,item)
+
                         if(item){
                             await User.findByIdAndUpdate({ _id: args.id }, { "$pull": { "watchlist": {imdbId:args.imdbId} }})
 
