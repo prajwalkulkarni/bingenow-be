@@ -1,19 +1,17 @@
 import express from 'express';
 import { Request, Response } from 'express'
 const app = express();
+const dbConnect = require('./mongo-client');
 
-
+const PORT_NO = 3001;
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
 }
 
 const expressGraphQL = require('express-graphql').graphqlHTTP;
-const mongoose = require('mongoose');
 const User = require('./models/user');
 const cors = require('cors');
-
-const PORT_NO = 3000;
 
 
 const { GraphQLObjectType,
@@ -111,34 +109,34 @@ const Mutation = new GraphQLObjectType({
             type: MediaType,
             args: {
                 item: {
-                    type:MediaInputType
+                    type: MediaInputType
                 },
                 userId: { type: GraphQLString }
             },
             resolve: async (parent: any, args: any) => {
-                
+
                 const user = await User.findOne({ _id: args.userId })
                 if (user) {
                     try {
                         const item = user.watchlist.find((item: any) => item.imdbId === args.item.imdbId)
-                        
-                        if(!item){
-                            await User.findByIdAndUpdate({ _id: args.userId }, { "$push": { "watchlist": args.item }})
 
-                            
-                        }else{
+                        if (!item) {
+                            await User.findByIdAndUpdate({ _id: args.userId }, { "$push": { "watchlist": args.item } })
+
+
+                        } else {
                             throw new Error('Media already exists in the watchlist')
                         }
                         return args.item
                     }
                     catch (err) {
-                        
+
                         console.log(err)
                         throw new Error('Item already exists in the watchlist')
                     }
-                    
+
                 }
-                
+
             }
         },
         removeFromWatchlist: {
@@ -148,7 +146,7 @@ const Mutation = new GraphQLObjectType({
                 id: { type: GraphQLString }
             },
             resolve: async (parent: any, args: any) => {
-                
+
                 const user = await User.findOne({ _id: args.id })
 
                 if (user) {
@@ -156,16 +154,16 @@ const Mutation = new GraphQLObjectType({
 
                         const item = user.watchlist.find((item: any) => item.imdbId === args.imdbId)
 
-                        if(item){
-                            await User.findByIdAndUpdate({ _id: args.id }, { "$pull": { "watchlist": {imdbId:args.imdbId} }})
+                        if (item) {
+                            await User.findByIdAndUpdate({ _id: args.id }, { "$pull": { "watchlist": { imdbId: args.imdbId } } })
 
-                        }else{
+                        } else {
                             throw new Error('Media does not exist in the watchlist')
                         }
                         return item
                     }
                     catch (err) {
-                        
+
                         console.log(err)
                         throw new Error('Media does not exist in the watchlist')
                     }
@@ -202,18 +200,12 @@ app.use('/graphql', expressGraphQL({
 }));
 
 
+dbConnect.then(() => {
+    app.listen(process.env.PORT || PORT_NO)
+    console.log("Connection successful!")
+}).catch((err: Error) => {
+    console.log("Error connecting to database: ", err)
+})
 
-mongoose.set("strictQuery", false);
-mongoose
-    .connect(`mongodb+srv://${process.env.DB_USR}:${process.env.DB_PASS}@cluster0.gmn6g.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    })
-    .then(() => {
-        app.listen(process.env.PORT || PORT_NO)
-        console.log("Connection successful!")
-    }).catch((err: Error) => {
-        console.log("Error connecting to database: ", err)
-    })
 
 exports.handler = app;
