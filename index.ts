@@ -211,7 +211,7 @@ if (process.env.NODE_ENV !== 'production') {
 exports.handler = async () => {
     try {
         await dbConnect();
-        app.listen(process.env.PORT || PORT_NO)
+        // app.listen(process.env.PORT || PORT_NO)
         console.log("Connection successful!")
         return {
             statusCode: 200,
