@@ -1,7 +1,7 @@
 import express from 'express';
 import { Context, APIGatewayProxyResult, APIGatewayEvent, Callback } from "aws-lambda";
 const app = express();
-const dbConnect = require('./mongo-client');
+const connectToDatabase = require('./mongo-client');
 
 const PORT_NO = 3001;
 
@@ -210,7 +210,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 exports.handler = async (event: APIGatewayEvent, context: Context, callback: Callback) => {
     try {
-        await dbConnect();
+        await connectToDatabase();
         // app.listen(process.env.PORT || PORT_NO)
         console.log("Connection successful!")
         callback(null, {
