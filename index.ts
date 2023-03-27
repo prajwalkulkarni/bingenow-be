@@ -1,5 +1,5 @@
 import express from 'express';
-import { Request, Response } from 'express'
+import { Context, APIGatewayProxyResult, APIGatewayEvent, Callback } from "aws-lambda";
 const app = express();
 const dbConnect = require('./mongo-client');
 
@@ -208,17 +208,17 @@ if (process.env.NODE_ENV !== 'production') {
 // })
 
 
-exports.handler = async () => {
+exports.handler = async (event: APIGatewayEvent, context: Context, callback: Callback) => {
     try {
         await dbConnect();
         // app.listen(process.env.PORT || PORT_NO)
         console.log("Connection successful!")
-        return {
+        callback(null, {
             statusCode: 200,
             body: JSON.stringify({
                 message: 'Connected to MongoDB database and started Express server',
             }),
-        };
+        });
 
     }
     catch (err: unknown) {
