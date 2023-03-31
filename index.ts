@@ -220,4 +220,9 @@ exports.handler = async(event: APIGatewayEvent, context: Context, callback: APIG
       callback(null, response);
     }
   });
+
+  return callback(null, {
+    statusCode: 200,
+    body: JSON.stringify({ message: 'Hello from Lambda!' }),
+    });
 }
