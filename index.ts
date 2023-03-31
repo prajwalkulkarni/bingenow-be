@@ -1,6 +1,6 @@
 import express from 'express';
 import { Request, Response } from 'express';
-import { Context, APIGatewayEvent } from 'aws-lambda';
+import { Context, APIGatewayEvent, APIGatewayProxyCallback } from 'aws-lambda';
 
 const app = express();
 const connectToDatabase = require('./mongo-client');
@@ -204,7 +204,8 @@ app.use('/graphql', expressGraphQL({
 
 const server = awsServerlessExpress.createServer(app);
 
-exports.handler = async(event: APIGatewayEvent, context: Context) => {
+exports.handler = async(event: APIGatewayEvent, context: Context, callback: APIGatewayProxyCallback) => {
     await connectToDatabase();
-    awsServerlessExpress.proxy(server, event, context);
+    console.log("Connection successful");
+    awsServerlessExpress.proxy(server, event, context, 'CALLBACK', callback);
 }
