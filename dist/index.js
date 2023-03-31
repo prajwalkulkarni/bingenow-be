@@ -5,14 +5,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const app = (0, express_1.default)();
+const connectToDatabase = require('./mongo-client');
+const awsServerlessExpress = require('aws-serverless-express');
+const PORT_NO = 3001;
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
 }
 const expressGraphQL = require('express-graphql').graphqlHTTP;
-const mongoose = require('mongoose');
 const User = require('./models/user');
 const cors = require('cors');
-const PORT_NO = 3000;
 const { GraphQLObjectType, GraphQLList, GraphQLSchema, GraphQLInt, GraphQLInputObjectType, GraphQLString } = require('graphql');
 const MediaType = new GraphQLObjectType({
     name: 'MediaType',
@@ -157,6 +158,7 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Request-With, Content-Type, Accept, Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,PUT,DELETE,OPTIONS');
+    res.set('Content-Type', 'application/json');
     next();
 });
 app.options('/graphql', cors());
@@ -165,16 +167,21 @@ app.use('/graphql', expressGraphQL({
     schema,
     mutation: Mutation,
 }));
-mongoose.set("strictQuery", false);
-mongoose
-    .connect(`mongodb+srv://${process.env.DB_USR}:${process.env.DB_PASS}@cluster0.gmn6g.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-    .then(() => {
-    app.listen(process.env.PORT || PORT_NO);
-    console.log("Connection successful!");
-}).catch((err) => {
-    console.log("Error connecting to database: ", err);
-});
-exports.handler = app;
+exports.handler = async (event, context, callback) => {
+    await connectToDatabase();
+    console.log("Connection successful", event);
+    const server = awsServerlessExpress.createServer(app);
+    const response = await new Promise((resolve, reject) => {
+        const { httpMethod, path, headers, body } = event;
+        const queryStringParameters = event.queryStringParameters || {};
+        const eventProxy = {
+            httpMethod,
+            path,
+            headers,
+            queryStringParameters,
+            body: JSON.parse(body)
+        };
+        awsServerlessExpress.proxy(server, eventProxy, Object.assign(Object.assign({}, context), { succeed: resolve, fail: reject }));
+    });
+    return response;
+};
