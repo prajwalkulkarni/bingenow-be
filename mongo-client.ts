@@ -192,7 +192,7 @@ async function connectToDatabase() {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
-        cachedDb = client.db();
+        cachedDb = client;
 
 
         app.use(express.json())
