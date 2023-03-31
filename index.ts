@@ -203,12 +203,32 @@ app.use('/graphql', expressGraphQL({
     mutation: Mutation,
 }));
 
-const server = awsServerlessExpress.createServer(app);
 
-exports.handler = async(event: APIGatewayEvent, context: Context, callback: APIGatewayProxyCallback) => {
+
+exports.handler = async (event: APIGatewayEvent, context: Context, callback: APIGatewayProxyCallback) => {
     await connectToDatabase();
-    console.log("Connection successful", event, context);
-    const res = await awsServerlessExpress.proxy(server, event, context);
 
-    return res;
+    console.log("Connection successful", event);
+    const server = awsServerlessExpress.createServer(app);
+
+    const response = await new Promise((resolve, reject) => {
+        const { httpMethod, path, headers, body } = event;
+        const queryStringParameters = event.queryStringParameters || {};
+
+        const eventProxy = {
+            httpMethod,
+            path,
+            headers,
+            queryStringParameters,
+            body: JSON.parse(body!)
+        };
+
+        awsServerlessExpress.proxy(server, eventProxy, {
+            ...context,
+            succeed: resolve,
+            fail: reject
+        });
+    });
+
+    return response;
 }
