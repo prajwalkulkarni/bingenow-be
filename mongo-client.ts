@@ -219,7 +219,7 @@ async function connectToDatabase() {
         return cachedDb;
     }
     catch (err) {
-        throw new Error("Error connecting to database");
+        throw new Error(`${err}`);
     }
 }
 module.exports = connectToDatabase;
