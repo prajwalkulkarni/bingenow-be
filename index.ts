@@ -1,6 +1,6 @@
 import express from 'express';
 import { Request, Response } from 'express';
-import { Context, APIGatewayEvent, APIGatewayProxyCallback } from 'aws-lambda';
+import { Context, APIGatewayEvent, APIGatewayProxyCallback, APIGatewayProxyResult } from 'aws-lambda';
 
 const app = express();
 const connectToDatabase = require('./mongo-client');
@@ -192,7 +192,7 @@ app.use((req: Request, res: Response, next: Function) => {
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Request-With, Content-Type, Accept, Authorization')
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,PUT,DELETE,OPTIONS')
     res.set('Content-Type', 'application/json');
-    
+
     next()
 })
 
@@ -208,5 +208,16 @@ const server = awsServerlessExpress.createServer(app);
 exports.handler = async(event: APIGatewayEvent, context: Context, callback: APIGatewayProxyCallback) => {
     await connectToDatabase();
     console.log("Connection successful");
-    awsServerlessExpress.proxy(server, event, context, 'CALLBACK', callback);
+    awsServerlessExpress.proxy(server, event, context, (error: Error | null, response: APIGatewayProxyResult) => {
+    if (error) {
+        console.log(error);
+      callback(error);
+    } else {
+      // set the Content-Type header
+      response.headers!['Content-Type'] = 'application/json';
+      console.log(response)
+      // send the response
+      callback(null, response);
+    }
+  });
 }
