@@ -206,23 +206,26 @@ app.use('/graphql', expressGraphQL({
 const server = awsServerlessExpress.createServer(app);
 
 exports.handler = async(event: APIGatewayEvent, context: Context, callback: APIGatewayProxyCallback) => {
-    await connectToDatabase();
-    console.log("Connection successful");
-    awsServerlessExpress.proxy(server, event, context, (error: Error | null, response: APIGatewayProxyResult) => {
-    if (error) {
-        console.log(error);
-      callback(error);
-    } else {
-      // set the Content-Type header
-      response.headers!['Content-Type'] = 'application/json';
-      console.log(response)
-      // send the response
-      callback(null, response);
-    }
-  });
+//     await connectToDatabase();
+//     console.log("Connection successful");
+//     awsServerlessExpress.proxy(server, event, context, (error: Error | null, response: APIGatewayProxyResult) => {
+//     if (error) {
+//         console.log(error);
+//       callback(error);
+//     } else {
+//       // set the Content-Type header
+//       response.headers!['Content-Type'] = 'application/json';
+//       console.log(response)
+//       // send the response
+//       callback(null, response);
+//     }
+//   });
 
   return callback(null, {
     statusCode: 200,
+    headers: {
+        'Content-Type': 'application/json'
+      },
     body: JSON.stringify({ message: 'Hello from Lambda!' }),
     });
 }
