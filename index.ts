@@ -1,7 +1,10 @@
 import express from 'express';
-import { Context, APIGatewayProxyResult, APIGatewayEvent, Callback } from "aws-lambda";
+import { Request, Response } from 'express';
+import { Context, APIGatewayEvent } from 'aws-lambda';
+
 const app = express();
 const connectToDatabase = require('./mongo-client');
+const awsServerlessExpress = require('aws-serverless-express');
 
 const PORT_NO = 3001;
 
@@ -9,219 +12,199 @@ if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
 }
 
-// const expressGraphQL = require('express-graphql').graphqlHTTP;
-// const User = require('./models/user');
-// const cors = require('cors');
+const expressGraphQL = require('express-graphql').graphqlHTTP;
+const User = require('./models/user');
+const cors = require('cors');
 
 
-// const { GraphQLObjectType,
-//     GraphQLList,
-//     GraphQLSchema,
-//     GraphQLInt,
-//     GraphQLInputObjectType,
-//     GraphQLString } = require('graphql');
+const { GraphQLObjectType,
+    GraphQLList,
+    GraphQLSchema,
+    GraphQLInt,
+    GraphQLInputObjectType,
+    GraphQLString } = require('graphql');
 
 
 
-// const MediaType = new GraphQLObjectType({
-//     name: 'MediaType',
-//     fields: () => ({
-//         imdbId: { type: GraphQLString },
-//         title: { type: GraphQLString },
-//         poster: { type: GraphQLString },
-//         plot: { type: GraphQLString },
-//         runtime: { type: GraphQLString },
-//         year: { type: GraphQLString },
-//         genre: { type: GraphQLString },
-//         media: { type: GraphQLString },
-//     })
-// })
+const MediaType = new GraphQLObjectType({
+    name: 'MediaType',
+    fields: () => ({
+        imdbId: { type: GraphQLString },
+        title: { type: GraphQLString },
+        poster: { type: GraphQLString },
+        plot: { type: GraphQLString },
+        runtime: { type: GraphQLString },
+        year: { type: GraphQLString },
+        genre: { type: GraphQLString },
+        media: { type: GraphQLString },
+    })
+})
 
-// const MediaInputType = new GraphQLInputObjectType({
-//     name: 'MediaInputType',
-//     fields: () => ({
-//         imdbId: { type: GraphQLString },
-//         title: { type: GraphQLString },
-//         poster: { type: GraphQLString },
-//         plot: { type: GraphQLString },
-//         runtime: { type: GraphQLString },
-//         year: { type: GraphQLString },
-//         genre: { type: GraphQLString },
-//         media: { type: GraphQLString },
-//     })
-// })
-// const UserType = new GraphQLObjectType({
-//     name: 'UserType',
-//     fields: () => ({
-//         id: { type: GraphQLString },
-//         email: { type: GraphQLString },
-//         watchlist: { type: new GraphQLList(MediaType) },
-//     })
-// })
-
-
-// const RootQuery = new GraphQLObjectType({
-//     name: 'RootQueryType',
-//     fields: () => ({
-//         watchlist: {
-//             type: new GraphQLList(MediaType),
-//             args: {
-//                 id: { type: GraphQLString }
-//             },
-//             resolve: async (parent: any, args: any) => {
-//                 const res = await User.findOne({ _id: args.id })
-//                 return res.watchlist
-//             }
-//         }
-//     })
-// });
-
-// const Mutation = new GraphQLObjectType({
-//     name: 'Mutation',
-//     fields: () => ({
-//         createOrGetUser: {
-//             type: UserType,
-//             args: {
-//                 email: { type: GraphQLString },
-//             },
-//             resolve: async (parent: any, args: any) => {
-
-//                 const user = await User.findOne({ email: args.email })
-//                 if (user) {
-//                     return {
-//                         id: user._id,
-//                         email: user.email,
-//                     }
-//                 }
-//                 const newUser = {
-//                     email: args.email,
-//                     watchlist: []
-//                 }
-//                 const registerUser = new User(newUser);
-//                 const user_id = await registerUser.save();
-//                 return {
-//                     id: user_id._id,
-//                     email: args.email
-//                 };
-//             }
-//         },
-//         addToWatchlist: {
-//             type: MediaType,
-//             args: {
-//                 item: {
-//                     type: MediaInputType
-//                 },
-//                 userId: { type: GraphQLString }
-//             },
-//             resolve: async (parent: any, args: any) => {
-
-//                 const user = await User.findOne({ _id: args.userId })
-//                 if (user) {
-//                     try {
-//                         const item = user.watchlist.find((item: any) => item.imdbId === args.item.imdbId)
-
-//                         if (!item) {
-//                             await User.findByIdAndUpdate({ _id: args.userId }, { "$push": { "watchlist": args.item } })
+const MediaInputType = new GraphQLInputObjectType({
+    name: 'MediaInputType',
+    fields: () => ({
+        imdbId: { type: GraphQLString },
+        title: { type: GraphQLString },
+        poster: { type: GraphQLString },
+        plot: { type: GraphQLString },
+        runtime: { type: GraphQLString },
+        year: { type: GraphQLString },
+        genre: { type: GraphQLString },
+        media: { type: GraphQLString },
+    })
+})
+const UserType = new GraphQLObjectType({
+    name: 'UserType',
+    fields: () => ({
+        id: { type: GraphQLString },
+        email: { type: GraphQLString },
+        watchlist: { type: new GraphQLList(MediaType) },
+    })
+})
 
 
-//                         } else {
-//                             throw new Error('Media already exists in the watchlist')
-//                         }
-//                         return args.item
-//                     }
-//                     catch (err) {
+const RootQuery = new GraphQLObjectType({
+    name: 'RootQueryType',
+    fields: () => ({
+        watchlist: {
+            type: new GraphQLList(MediaType),
+            args: {
+                id: { type: GraphQLString }
+            },
+            resolve: async (parent: any, args: any) => {
+                const res = await User.findOne({ _id: args.id })
+                return res.watchlist
+            }
+        }
+    })
+});
 
-//                         console.log(err)
-//                         throw new Error('Item already exists in the watchlist')
-//                     }
+const Mutation = new GraphQLObjectType({
+    name: 'Mutation',
+    fields: () => ({
+        createOrGetUser: {
+            type: UserType,
+            args: {
+                email: { type: GraphQLString },
+            },
+            resolve: async (parent: any, args: any) => {
 
-//                 }
+                const user = await User.findOne({ email: args.email })
+                if (user) {
+                    return {
+                        id: user._id,
+                        email: user.email,
+                    }
+                }
+                const newUser = {
+                    email: args.email,
+                    watchlist: []
+                }
+                const registerUser = new User(newUser);
+                const user_id = await registerUser.save();
+                return {
+                    id: user_id._id,
+                    email: args.email
+                };
+            }
+        },
+        addToWatchlist: {
+            type: MediaType,
+            args: {
+                item: {
+                    type: MediaInputType
+                },
+                userId: { type: GraphQLString }
+            },
+            resolve: async (parent: any, args: any) => {
 
-//             }
-//         },
-//         removeFromWatchlist: {
-//             type: MediaType,
-//             args: {
-//                 imdbId: { type: GraphQLString },
-//                 id: { type: GraphQLString }
-//             },
-//             resolve: async (parent: any, args: any) => {
+                const user = await User.findOne({ _id: args.userId })
+                if (user) {
+                    try {
+                        const item = user.watchlist.find((item: any) => item.imdbId === args.item.imdbId)
 
-//                 const user = await User.findOne({ _id: args.id })
-
-//                 if (user) {
-//                     try {
-
-//                         const item = user.watchlist.find((item: any) => item.imdbId === args.imdbId)
-
-//                         if (item) {
-//                             await User.findByIdAndUpdate({ _id: args.id }, { "$pull": { "watchlist": { imdbId: args.imdbId } } })
-
-//                         } else {
-//                             throw new Error('Media does not exist in the watchlist')
-//                         }
-//                         return item
-//                     }
-//                     catch (err) {
-
-//                         console.log(err)
-//                         throw new Error('Media does not exist in the watchlist')
-//                     }
-//                 }
-//             }
-//         }
-
-//     })
-// })
-
-// const schema = new GraphQLSchema({
-//     query: RootQuery,
-//     mutation: Mutation
-// });
-
-// app.use(express.json())
-// app.use(express.urlencoded({ extended: true }))
-
-
-// app.use((req: Request, res: Response, next: Function) => {
-
-//     res.setHeader('Access-Control-Allow-Origin', '*')
-//     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Request-With, Content-Type, Accept, Authorization')
-//     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,PUT,DELETE,OPTIONS')
-
-//     next()
-// })
-
-// app.options('/graphql', cors())
-// app.use('/graphql', expressGraphQL({
-//     graphiql: true,
-//     schema,
-//     mutation: Mutation,
-// }));
+                        if (!item) {
+                            await User.findByIdAndUpdate({ _id: args.userId }, { "$push": { "watchlist": args.item } })
 
 
-// dbConnect.then(() => {
-//     app.listen(process.env.PORT || PORT_NO)
-//     console.log("Connection successful!")
-// }).catch((err: Error) => {
-//     console.log("Error connecting to database: ", err)
-// })
+                        } else {
+                            throw new Error('Media already exists in the watchlist')
+                        }
+                        return args.item
+                    }
+                    catch (err) {
+
+                        console.log(err)
+                        throw new Error('Item already exists in the watchlist')
+                    }
+
+                }
+
+            }
+        },
+        removeFromWatchlist: {
+            type: MediaType,
+            args: {
+                imdbId: { type: GraphQLString },
+                id: { type: GraphQLString }
+            },
+            resolve: async (parent: any, args: any) => {
+
+                const user = await User.findOne({ _id: args.id })
+
+                if (user) {
+                    try {
+
+                        const item = user.watchlist.find((item: any) => item.imdbId === args.imdbId)
+
+                        if (item) {
+                            await User.findByIdAndUpdate({ _id: args.id }, { "$pull": { "watchlist": { imdbId: args.imdbId } } })
+
+                        } else {
+                            throw new Error('Media does not exist in the watchlist')
+                        }
+                        return item
+                    }
+                    catch (err) {
+
+                        console.log(err)
+                        throw new Error('Media does not exist in the watchlist')
+                    }
+                }
+            }
+        }
+
+    })
+})
+
+const schema = new GraphQLSchema({
+    query: RootQuery,
+    mutation: Mutation
+});
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 
-exports.handler = async (event: APIGatewayEvent, context: Context, callback: Callback) => {
-    try {
-        await connectToDatabase();
-        // app.listen(process.env.PORT || PORT_NO)
-        console.log("Connection successful!")
-        callback(null, {
-            statusCode: 200,
-            body: JSON.stringify({
-                message: 'Connected to MongoDB database and started Express server',
-            }),
-        });
+app.use((req: Request, res: Response, next: Function) => {
 
-    }
-    catch (err: unknown) {
-        console.log("Error connecting to database: ", err)
-    }
-};
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Request-With, Content-Type, Accept, Authorization')
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,PUT,DELETE,OPTIONS')
+
+    next()
+})
+
+app.options('/graphql', cors())
+app.use('/graphql', expressGraphQL({
+    graphiql: true,
+    schema,
+    mutation: Mutation,
+}));
+
+const server = awsServerlessExpress.createServer(app);
+
+exports.handler = async(event: APIGatewayEvent, context: Context) => {
+    await connectToDatabase();
+    awsServerlessExpress.proxy(server, event, context);
+}
