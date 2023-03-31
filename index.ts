@@ -207,7 +207,7 @@ const server = awsServerlessExpress.createServer(app);
 
 exports.handler = async(event: APIGatewayEvent, context: Context, callback: APIGatewayProxyCallback) => {
     await connectToDatabase();
-    console.log("Connection successful");
+    console.log("Connection successful", event, context);
     const res = await awsServerlessExpress.proxy(server, event, context);
 
     return res;
