@@ -220,7 +220,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context, callback: API
             path,
             headers,
             queryStringParameters,
-            body: JSON.stringify(body)
+            body: body,
         };
 
         awsServerlessExpress.proxy(server, eventProxy, {
