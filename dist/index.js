@@ -73,6 +73,7 @@ const Mutation = new GraphQLObjectType({
                 email: { type: GraphQLString },
             },
             resolve: async (parent, args) => {
+                console.log("Reached mutation resolver");
                 const user = await User.findOne({ email: args.email });
                 if (user) {
                     return {
@@ -179,7 +180,7 @@ exports.handler = async (event, context, callback) => {
             path,
             headers,
             queryStringParameters,
-            body: JSON.parse(body)
+            body: body,
         };
         awsServerlessExpress.proxy(server, eventProxy, Object.assign(Object.assign({}, context), { succeed: resolve, fail: reject }));
     });
