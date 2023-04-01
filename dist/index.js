@@ -73,7 +73,6 @@ const Mutation = new GraphQLObjectType({
                 email: { type: GraphQLString },
             },
             resolve: async (parent, args) => {
-                console.log("Reached mutation resolver");
                 const user = await User.findOne({ email: args.email });
                 if (user) {
                     return {
@@ -170,14 +169,14 @@ app.use('/graphql', expressGraphQL({
 }));
 exports.handler = async (event, context, callback) => {
     await connectToDatabase();
-    console.log("Connection successful", event);
+    console.log("Connection successful");
     const server = awsServerlessExpress.createServer(app);
     const response = await new Promise((resolve, reject) => {
         const { httpMethod, path, headers, body } = event;
         const queryStringParameters = event.queryStringParameters || {};
         const eventProxy = {
             httpMethod,
-            path,
+            path: "/graphql",
             headers,
             queryStringParameters,
             body: body,

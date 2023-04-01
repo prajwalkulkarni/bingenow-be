@@ -208,14 +208,13 @@ app.use('/graphql', expressGraphQL({
 exports.handler = async (event: APIGatewayEvent, context: Context, callback: APIGatewayProxyCallback) => {
     await connectToDatabase();
 
-    console.log("Connection successful", event);
+    console.log("Connection successful");
     const server = awsServerlessExpress.createServer(app);
 
     const response = await new Promise((resolve, reject) => {
         const { httpMethod, path, headers, body } = event;
         const queryStringParameters = event.queryStringParameters || {};
 
-        console.log(event);
         const eventProxy = {
             httpMethod,
             path :"/graphql",
@@ -230,7 +229,6 @@ exports.handler = async (event: APIGatewayEvent, context: Context, callback: API
             fail: reject
         });
     });
-    console.log(response);
 
     return response;
 }
