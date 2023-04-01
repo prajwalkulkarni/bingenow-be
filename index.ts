@@ -215,7 +215,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context, callback: API
         const { httpMethod, path, headers, body } = event;
         const queryStringParameters = event.queryStringParameters || {};
 
-        console.log(path);
+        console.log(event);
         const eventProxy = {
             httpMethod,
             path :"/graphql",
