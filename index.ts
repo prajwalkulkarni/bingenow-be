@@ -88,7 +88,7 @@ const Mutation = new GraphQLObjectType({
                 email: { type: GraphQLString },
             },
             resolve: async (parent: any, args: any) => {
-                console.log("Reached mutation resolver")
+                
                 const user = await User.findOne({ email: args.email })
                 if (user) {
                     return {
@@ -229,6 +229,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context, callback: API
             fail: reject
         });
     });
+    console.log(response);
 
     return response;
 }
