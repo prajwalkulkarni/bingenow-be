@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const app = (0, express_1.default)();
+const app = express_1.default();
 const connectToDatabase = require('./mongo-client');
 const awsServerlessExpress = require('aws-serverless-express');
 const PORT_NO = 3001;
@@ -167,7 +167,7 @@ app.use('/graphql', expressGraphQL({
     schema,
     mutation: Mutation,
 }));
-exports.handler = async (event, context, callback) => {
+exports.handler = async (event, context) => {
     await connectToDatabase();
     console.log("Connection successful");
     const server = awsServerlessExpress.createServer(app);
