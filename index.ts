@@ -190,7 +190,7 @@ app.use((req: Request, res: Response, next: Function) => {
 
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Request-With, Content-Type, Accept, Authorization')
-    res.setHeader('Access-Control-Allow-Methods', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,PUT,DELETE,OPTIONS')
     res.set('Content-Type', 'application/json');
 
     next()
@@ -206,7 +206,6 @@ app.use('/graphql', expressGraphQL({
 
 
 exports.handler = async (event: APIGatewayEvent, context: Context) => {
-    console.log("Hitting the handler!", event)
     await connectToDatabase();
 
     console.log("Connection successful");
