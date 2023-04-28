@@ -206,6 +206,7 @@ app.use('/graphql', expressGraphQL({
 
 
 exports.handler = async (event: APIGatewayEvent, context: Context) => {
+    console.log("Hitting the handler!", event)
     await connectToDatabase();
 
     console.log("Connection successful");
