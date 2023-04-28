@@ -1,6 +1,6 @@
 import express from 'express';
 import { Request, Response } from 'express';
-import { Context, APIGatewayEvent, APIGatewayProxyCallback, APIGatewayProxyResult } from 'aws-lambda';
+import { Context, APIGatewayEvent } from 'aws-lambda';
 
 const app = express();
 const connectToDatabase = require('./mongo-client');
@@ -190,7 +190,7 @@ app.use((req: Request, res: Response, next: Function) => {
 
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Request-With, Content-Type, Accept, Authorization')
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,PUT,DELETE,OPTIONS')
+    res.setHeader('Access-Control-Allow-Methods', '*')
     res.set('Content-Type', 'application/json');
 
     next()
