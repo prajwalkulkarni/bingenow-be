@@ -17,7 +17,7 @@ async function connectToDatabase() {
 
 
     try {
-        const client = await mongoose.connect(`mongodb+srv://${process.env.DB_USR}:${process.env.DB_PASS}@cluster0.jwwauv4.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`, {
+        const client = await mongoose.connect(`mongodb+srv://${process.env.DB_USR}:${process.env.DB_PASS}@cluster0.jwwauv4.mongodb.net/?retryWrites=true&w=majority`, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
