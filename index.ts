@@ -122,7 +122,9 @@ const Mutation = new GraphQLObjectType({
                 if (user) {
                     try {
                         const item = user.watchlist.find((item: any) => item.imdbId === args.item.imdbId)
-
+                        if(user.watchlist.length >= 10){
+                            throw new Error('Watchlist can have upto 10 items. Please remove an item to add a new one.')
+                        }
                         if (!item) {
                             await User.findByIdAndUpdate({ _id: args.userId }, { "$push": { "watchlist": args.item } })
 
