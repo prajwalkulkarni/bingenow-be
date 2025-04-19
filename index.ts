@@ -38,29 +38,29 @@ const RootQuery = new GraphQLObjectType({
         return res.watchlist;
       },
     },
-    // latestpopularmovies: {
-    //   type: new GraphQLList(MediaType),
-    //   args: {},
-    //   resolve: async (parent: unknown, args: unknown) => {
-    //     try {
-    //       const response = await fetch(
-    //         "https://api.themoviedb.org/3/movie/popular?api_key=7e781002994df832bb2bcb06c4951e32&language=en-US&page=1",
-    //         {
-    //           method: "GET",
-    //           headers: {
-    //             "Content-Type": "application/json",
-    //             "X-Forwarded-For": "api.themoviedb.org",
-    //           },
-    //         }
-    //       );
+    latestpopularmovies: {
+      type: new GraphQLList(MediaType),
+      args: {},
+      resolve: async (parent: unknown, args: unknown) => {
+        try {
+          const response = await fetch(
+            "https://api.themoviedb.org/3/movie/popular?api_key=7e781002994df832bb2bcb06c4951e32&language=en-US&page=1",
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "X-Forwarded-For": "api.themoviedb.org",
+              },
+            }
+          );
 
-    //       const asJSON = await response.json();
-    //       return asJSON;
-    //     } catch (err) {
-    //       console.error("Something went wrong");
-    //     }
-    //   },
-    // },
+          const asJSON = await response.json();
+          return asJSON;
+        } catch (err) {
+          console.error("Something went wrong");
+        }
+      },
+    },
   }),
 });
 
@@ -194,27 +194,6 @@ app.use(
     mutation: Mutation,
   })
 );
-
-app.get("/tmdb/latestpopularmovies", async (req: Request, res: Response) => {
-  try {
-    const response = await fetch(
-      "https://api.themoviedb.org/3/movie/popular?api_key=7e781002994df832bb2bcb06c4951e32&language=en-US&page=1",
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Forwarded-For": "api.themoviedb.org",
-        },
-      }
-    );
-
-    const asJSON = await response.json();
-    res.json(asJSON);
-  } catch (err) {
-    console.error("Something went wrong", err);
-    res.status(500).json({ error: "Something went wrong" });
-  }
-});
 
 exports.handler = async (event: APIGatewayEvent, context: Context) => {
   await connectToDatabase();
