@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { Context, APIGatewayEvent } from "aws-lambda";
 import { MediaInputType, MediaType } from "./modules/media";
 import { UserType } from "./modules/user";
+import { LatestPopularMoviesType } from "./modules/tmdb/latestpopularmovies";
 const fetch = require("node-fetch");
 const app = express();
 const connectToDatabase = require("./mongo-client");
@@ -39,7 +40,7 @@ const RootQuery = new GraphQLObjectType({
       },
     },
     latestpopularmovies: {
-      type: new GraphQLList(MediaType),
+      type: LatestPopularMoviesType,
       args: {},
       resolve: async (parent: unknown, args: unknown) => {
         try {
