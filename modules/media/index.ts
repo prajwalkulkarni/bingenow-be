@@ -1,5 +1,3 @@
-import { MediaType } from "../../server/generated-types/graphql";
-
 const {
   GraphQLObjectType,
   GraphQLInputObjectType,
