@@ -134,6 +134,11 @@ const RootQuery = new GraphQLObjectType({
           );
 
           const asJSON = await response.json();
+          const episodesDetails = [
+            ...asJSON[`season/${args.season}`]["episodes"],
+          ];
+          delete asJSON[`season/${args.season}`];
+          asJSON.episodes = episodesDetails;
           return asJSON;
         } catch (err) {
           console.error("Something went wrong");

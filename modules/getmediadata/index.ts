@@ -6,38 +6,29 @@ import {
   GraphQLObjectType,
   GraphQLString,
 } from "graphql";
+import {
+  CreatedByType,
+  GenreType,
+  LastEdpisodeToAirType,
+  NetoworkType,
+  NextEpisodeToAirType,
+  ProductionCompanyType,
+  ProductionCountryType,
+  SeasonType,
+  SpokenLanguageType,
+} from "../common";
 
 const GetMediaDataTypeFields = {
   adult: { type: GraphQLBoolean },
   backdrop_path: { type: GraphQLString },
   created_by: {
-    type: new GraphQLList(
-      new GraphQLObjectType({
-        name: "CreatedBy",
-        fields: {
-          id: { type: GraphQLInt },
-          credit_id: { type: GraphQLString },
-          name: { type: GraphQLString },
-          original_name: { type: GraphQLString },
-          gender: { type: GraphQLInt },
-          profile_path: { type: GraphQLString },
-        },
-      })
-    ),
+    type: new GraphQLList(CreatedByType),
   },
   episode_run_time: { type: new GraphQLList(GraphQLInt) },
   first_air_date: { type: GraphQLString },
   release_date: { type: GraphQLString },
   genres: {
-    type: new GraphQLList(
-      new GraphQLObjectType({
-        name: "Genre",
-        fields: {
-          id: { type: GraphQLInt },
-          name: { type: GraphQLString },
-        },
-      })
-    ),
+    type: new GraphQLList(GenreType),
   },
   homepage: { type: GraphQLString },
   id: { type: GraphQLInt },
@@ -45,59 +36,15 @@ const GetMediaDataTypeFields = {
   languages: { type: new GraphQLList(GraphQLString) },
   last_air_date: { type: GraphQLString },
   last_episode_to_air: {
-    type: new GraphQLObjectType({
-      name: "LastEpisodeToAir",
-      fields: {
-        id: { type: GraphQLInt },
-        name: { type: GraphQLString },
-        overview: { type: GraphQLString },
-        vote_average: { type: GraphQLFloat },
-        vote_count: { type: GraphQLInt },
-        air_date: { type: GraphQLString },
-        episode_number: { type: GraphQLInt },
-        episode_type: { type: GraphQLString },
-        production_code: { type: GraphQLString },
-        runtime: { type: GraphQLInt },
-        season_number: { type: GraphQLInt },
-        show_id: { type: GraphQLInt },
-        still_path: { type: GraphQLString },
-      },
-    }),
+    type: LastEdpisodeToAirType,
   },
   name: { type: GraphQLString },
   title: { type: GraphQLString },
   next_episode_to_air: {
-    type: new GraphQLObjectType({
-      name: "NextEpisodeToAir",
-      fields: {
-        id: { type: GraphQLInt },
-        name: { type: GraphQLString },
-        overview: { type: GraphQLString },
-        vote_average: { type: GraphQLFloat },
-        vote_count: { type: GraphQLInt },
-        air_date: { type: GraphQLString },
-        episode_number: { type: GraphQLInt },
-        episode_type: { type: GraphQLString },
-        production_code: { type: GraphQLString },
-        runtime: { type: GraphQLInt },
-        season_number: { type: GraphQLInt },
-        show_id: { type: GraphQLInt },
-        still_path: { type: GraphQLString },
-      },
-    }),
+    type: NextEpisodeToAirType,
   },
   networks: {
-    type: new GraphQLList(
-      new GraphQLObjectType({
-        name: "Network",
-        fields: {
-          id: { type: GraphQLInt },
-          logo_path: { type: GraphQLString },
-          name: { type: GraphQLString },
-          origin_country: { type: GraphQLString },
-        },
-      })
-    ),
+    type: new GraphQLList(NetoworkType),
   },
   number_of_episodes: { type: GraphQLInt },
   number_of_seasons: { type: GraphQLInt },
@@ -108,57 +55,16 @@ const GetMediaDataTypeFields = {
   popularity: { type: GraphQLFloat },
   poster_path: { type: GraphQLString },
   production_companies: {
-    type: new GraphQLList(
-      new GraphQLObjectType({
-        name: "ProductionCompany",
-        fields: {
-          id: { type: GraphQLInt },
-          logo_path: { type: GraphQLString },
-          name: { type: GraphQLString },
-          origin_country: { type: GraphQLString },
-        },
-      })
-    ),
+    type: new GraphQLList(ProductionCompanyType),
   },
   production_countries: {
-    type: new GraphQLList(
-      new GraphQLObjectType({
-        name: "ProductionCountry",
-        fields: {
-          iso_3166_1: { type: GraphQLString },
-          name: { type: GraphQLString },
-        },
-      })
-    ),
+    type: new GraphQLList(ProductionCountryType),
   },
   seasons: {
-    type: new GraphQLList(
-      new GraphQLObjectType({
-        name: "Season",
-        fields: {
-          air_date: { type: GraphQLString },
-          episode_count: { type: GraphQLInt },
-          id: { type: GraphQLInt },
-          name: { type: GraphQLString },
-          overview: { type: GraphQLString },
-          poster_path: { type: GraphQLString },
-          season_number: { type: GraphQLInt },
-          vote_average: { type: GraphQLFloat },
-        },
-      })
-    ),
+    type: new GraphQLList(SeasonType),
   },
   spoken_languages: {
-    type: new GraphQLList(
-      new GraphQLObjectType({
-        name: "SpokenLanguage",
-        fields: {
-          english_name: { type: GraphQLString },
-          iso_639_1: { type: GraphQLString },
-          name: { type: GraphQLString },
-        },
-      })
-    ),
+    type: new GraphQLList(SpokenLanguageType),
   },
   status: { type: GraphQLString },
   tagline: { type: GraphQLString },

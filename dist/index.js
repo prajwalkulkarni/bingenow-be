@@ -6,6 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const media_1 = require("./modules/media");
 const user_1 = require("./modules/user");
+const latestpopularmovies_1 = require("./modules/tmdb/latestpopularmovies");
+const trendingtvshows_1 = require("./modules/tmdb/trendingtvshows");
+const find_1 = require("./modules/tmdb/find");
+const getseasondetails_1 = require("./modules/tmdb/getseasondetails");
+const getmediadata_1 = require("./modules/getmediadata");
 const fetch = require("node-fetch");
 const app = (0, express_1.default)();
 const connectToDatabase = require("./mongo-client");
@@ -31,28 +36,119 @@ const RootQuery = new GraphQLObjectType({
                 return res.watchlist;
             },
         },
-        // latestpopularmovies: {
-        //   type: new GraphQLList(MediaType),
-        //   args: {},
-        //   resolve: async (parent: unknown, args: unknown) => {
-        //     try {
-        //       const response = await fetch(
-        //         "https://api.themoviedb.org/3/movie/popular?api_key=7e781002994df832bb2bcb06c4951e32&language=en-US&page=1",
-        //         {
-        //           method: "GET",
-        //           headers: {
-        //             "Content-Type": "application/json",
-        //             "X-Forwarded-For": "api.themoviedb.org",
-        //           },
-        //         }
-        //       );
-        //       const asJSON = await response.json();
-        //       return asJSON;
-        //     } catch (err) {
-        //       console.error("Something went wrong");
-        //     }
-        //   },
-        // },
+        latestpopularmovies: {
+            type: latestpopularmovies_1.LatestPopularMoviesType,
+            args: {},
+            resolve: async (parent, args) => {
+                try {
+                    const response = await fetch("https://api.themoviedb.org/3/movie/popular?api_key=7e781002994df832bb2bcb06c4951e32&language=en-US&page=1", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-Forwarded-For": "api.themoviedb.org",
+                        },
+                    });
+                    const asJSON = await response.json();
+                    return asJSON;
+                }
+                catch (err) {
+                    console.error("Something went wrong");
+                }
+            },
+        },
+        trendingtvshows: {
+            type: trendingtvshows_1.TrendingTVShowsType,
+            args: {},
+            resolve: async (parent, args) => {
+                try {
+                    const response = await fetch("https://api.themoviedb.org/3/tv/top_rated?api_key=7e781002994df832bb2bcb06c4951e32&language=en-US&page=1", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-Forwarded-For": "api.themoviedb.org",
+                        },
+                    });
+                    const asJSON = await response.json();
+                    return asJSON;
+                }
+                catch (err) {
+                    console.error("Something went wrong");
+                }
+            },
+        },
+        findMovieOrTV: {
+            type: find_1.FindMovieTVType,
+            args: {
+                imdbId: { type: GraphQLString },
+            },
+            resolve: async (parent, args) => {
+                try {
+                    const response = await fetch(`https://api.themoviedb.org/3/find/${args.imdbId}?api_key=7e781002994df832bb2bcb06c4951e32&external_source=imdb_id`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-Forwarded-For": "api.themoviedb.org",
+                        },
+                    });
+                    const asJSON = await response.json();
+                    return asJSON;
+                }
+                catch (err) {
+                    console.error("Something went wrong");
+                }
+            },
+        },
+        getseasondetails: {
+            type: getseasondetails_1.GetSeasonDetailsType,
+            args: {
+                tmdbId: { type: GraphQLString },
+                season: { type: GraphQLString },
+            },
+            resolve: async (parent, args) => {
+                try {
+                    const response = await fetch(`https://api.themoviedb.org/3/tv/${args.tmdbId}?api_key=7e781002994df832bb2bcb06c4951e32&append_to_response=season/${args.season}`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-Forwarded-For": "api.themoviedb.org",
+                        },
+                    });
+                    const asJSON = await response.json();
+                    const episodesDetails = [
+                        ...asJSON[`season/${args.season}`]["episodes"],
+                    ];
+                    delete asJSON[`season/${args.season}`];
+                    asJSON.episodes = episodesDetails;
+                    return asJSON;
+                }
+                catch (err) {
+                    console.error("Something went wrong");
+                }
+            },
+        },
+        getmediadata: {
+            type: getmediadata_1.GetMediaDataType,
+            args: {
+                media_type: { type: GraphQLString },
+                imdbId: { type: GraphQLString },
+            },
+            resolve: async (parent, args) => {
+                try {
+                    const response = await fetch(`https://api.themoviedb.org/3/${args.media_type}/${args.imdbId}?api_key=7e781002994df832bb2bcb06c4951e32`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-Forwarded-For": "api.themoviedb.org",
+                        },
+                    });
+                    const asJSON = await response.json();
+                    return asJSON;
+                }
+                catch (err) {
+                    console.error("Something went wrong");
+                }
+            },
+        },
     }),
 });
 const Mutation = new GraphQLObjectType({
@@ -161,23 +257,6 @@ app.use("/graphql", expressGraphQL({
     schema,
     mutation: Mutation,
 }));
-app.get("/tmdb/latestpopularmovies", async (req, res) => {
-    try {
-        const response = await fetch("https://api.themoviedb.org/3/movie/popular?api_key=7e781002994df832bb2bcb06c4951e32&language=en-US&page=1", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "X-Forwarded-For": "api.themoviedb.org",
-            },
-        });
-        const asJSON = await response.json();
-        res.json(asJSON);
-    }
-    catch (err) {
-        console.error("Something went wrong", err);
-        res.status(500).json({ error: "Something went wrong" });
-    }
-});
 exports.handler = async (event, context) => {
     await connectToDatabase();
     console.log("Connection successful");
