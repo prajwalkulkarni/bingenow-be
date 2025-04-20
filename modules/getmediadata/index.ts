@@ -27,6 +27,7 @@ const GetMediaDataTypeFields = {
   },
   episode_run_time: { type: new GraphQLList(GraphQLInt) },
   first_air_date: { type: GraphQLString },
+  release_date: { type: GraphQLString },
   genres: {
     type: new GraphQLList(
       new GraphQLObjectType({
@@ -64,6 +65,7 @@ const GetMediaDataTypeFields = {
     }),
   },
   name: { type: GraphQLString },
+  title: { type: GraphQLString },
   next_episode_to_air: {
     type: new GraphQLObjectType({
       name: "NextEpisodeToAir",
