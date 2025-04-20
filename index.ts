@@ -46,7 +46,7 @@ const RootQuery = new GraphQLObjectType({
     latestpopularmovies: {
       type: LatestPopularMoviesType,
       args: {},
-      resolve: async (parent: unknown, args: unknown) => {
+      resolve: async () => {
         try {
           const response = await fetch(
             "https://api.themoviedb.org/3/movie/popular?api_key=7e781002994df832bb2bcb06c4951e32&language=en-US&page=1",
@@ -69,7 +69,7 @@ const RootQuery = new GraphQLObjectType({
     trendingtvshows: {
       type: TrendingTVShowsType,
       args: {},
-      resolve: async (parent: unknown, args: unknown) => {
+      resolve: async () => {
         try {
           const response = await fetch(
             "https://api.themoviedb.org/3/tv/top_rated?api_key=7e781002994df832bb2bcb06c4951e32&language=en-US&page=1",
@@ -94,10 +94,11 @@ const RootQuery = new GraphQLObjectType({
       args: {
         imdbId: { type: GraphQLString },
       },
-      resolve: async (parent: any, args: any) => {
+      resolve: async (_: unknown, args: { imdbId: string }) => {
         try {
+          const imdbId = String(args.imdbId); // Ensure imdbId is a string
           const response = await fetch(
-            `https://api.themoviedb.org/3/find/${args.imdbId}?api_key=7e781002994df832bb2bcb06c4951e32&external_source=imdb_id`,
+            `https://api.themoviedb.org/3/find/${imdbId}?api_key=7e781002994df832bb2bcb06c4951e32&external_source=imdb_id`,
             {
               method: "GET",
               headers: {
@@ -110,7 +111,7 @@ const RootQuery = new GraphQLObjectType({
           const asJSON = await response.json();
           return asJSON;
         } catch (err) {
-          console.error("Something went wrong");
+          console.error("Something went wrong", err);
         }
       },
     },
@@ -120,7 +121,7 @@ const RootQuery = new GraphQLObjectType({
         tmdbId: { type: GraphQLString },
         season: { type: GraphQLString },
       },
-      resolve: async (parent: any, args: any) => {
+      resolve: async (_: unknown, args: { tmdbId: string; season: string }) => {
         try {
           const response = await fetch(
             `https://api.themoviedb.org/3/tv/${args.tmdbId}?api_key=7e781002994df832bb2bcb06c4951e32&append_to_response=season/${args.season}`,
@@ -151,7 +152,10 @@ const RootQuery = new GraphQLObjectType({
         media_type: { type: GraphQLString },
         imdbId: { type: GraphQLString },
       },
-      resolve: async (parent: any, args: any) => {
+      resolve: async (
+        _: unknown,
+        args: { media_type: string; imdbId: string }
+      ) => {
         try {
           const response = await fetch(
             `https://api.themoviedb.org/3/${args.media_type}/${args.imdbId}?api_key=7e781002994df832bb2bcb06c4951e32`,
