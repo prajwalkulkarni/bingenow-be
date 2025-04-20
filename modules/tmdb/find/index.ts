@@ -6,7 +6,7 @@ const FindMovieTVType = new GraphQLObjectType({
   name: "FindMovieTVType",
   fields: () => ({
     movie_results: { type: new GraphQLList(MovieResultsType) },
-    tv_results: { type: new GraphQLList(TVResultsType) },
+    tv_results: { type: new GraphQLList(FindTVResultsType) },
   }),
 });
 
@@ -33,8 +33,8 @@ const MovieResultsType = new GraphQLObjectType({
   }),
 });
 
-const TVResultsType = new GraphQLObjectType({
-  name: "TVResultsType",
+const FindTVResultsType = new GraphQLObjectType({
+  name: "FindTVResultsType",
   fields: () => ({
     adult: { type: GraphQLBoolean },
     backdrop_path: { type: GraphQLString },
